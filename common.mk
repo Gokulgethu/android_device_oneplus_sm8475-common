@@ -4,6 +4,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+# Dolby Atmos (portable DAP/DaxUI package) — pulled from hardware/dolby via the
+# local manifest. No-op if not present.
+$(call inherit-product-if-exists, hardware/dolby/dolby.mk)
+
 # A/B
 $(call inherit-product, $(SRC_TARGET_DIR)/product/virtual_ab_ota/launch_with_vendor_ramdisk.mk)
 
