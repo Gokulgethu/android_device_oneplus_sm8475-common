@@ -119,11 +119,52 @@ TARGET_KERNEL_SOURCE ?= kernel/oneplus/sm8475
 TARGET_KERNEL_CONFIG := vendor/taro-qgki_defconfig
 TARGET_KERNEL_NO_GCC := true
 
-# Kernel modules
-BOARD_VENDOR_KERNEL_MODULES_BLOCKLIST_FILE := $(COMMON_PATH)/modules.blocklist
-BOARD_VENDOR_KERNEL_MODULES_LOAD := $(strip $(shell cat $(COMMON_PATH)/modules.load))
-BOARD_VENDOR_RAMDISK_RECOVERY_KERNEL_MODULES_LOAD := $(strip $(shell cat $(COMMON_PATH)/modules.load.recovery))
-BOOT_KERNEL_MODULES := $(strip $(shell cat $(COMMON_PATH)/modules.include.recovery))
+# ----------------------------------------------------------------------------
+# LineageOS-style kernel-header soong generator variables.
+#
+# vendor/lineage/build/soong/Android.bp expands generated_kernel_includes /
+# prebuilt_kernel_includes through the "lineageVarsPlugin" soong namespace.
+# On LineageOS that namespace is populated by BoardConfigKernel.mk +
+# BoardConfigSoong.mk (pulled in via BoardConfigLineage.mk only when the lunch
+# target starts with "lineage_"). Every other ROM (crdroid_, aosp_, evolution_,
+# rising_, pixelos_, matrixx_, derp_, bliss_, ...) leaves the namespace empty
+# and soong aborts with:
+#   unknown variable '$(KERNEL_BUILD_OUT_PREFIX)'
+#   unknown variable '$(TARGET_KERNEL_PLATFORM_TARGET)'
+# Registering the vars here fixes the genrules on any custom ROM. This board
+# builds the kernel the classic make way, so the bazel platform target is empty.
+# ----------------------------------------------------------------------------
+KERNEL_ARCH ?= arm64
+KERNEL_MAKE_CMD ?= $(abspath .)/prebuilts/build-tools/$(HOST_PREBUILT_TAG)/bin/make
+# Empty when the soong gen dir ($(genDir)) is already absolute.
+KERNEL_BUILD_OUT_PREFIX ?=
+# Classic "make" kernel build: no bazel GKI platform target, no cross-compile /
+# extra make flags / host PATH override needed for the header genrule.
+TARGET_KERNEL_PLATFORM_TARGET ?=
+KERNEL_CROSS_COMPILE ?=
+KERNEL_MAKE_FLAGS ?=
+KERNEL_PATH ?=
+PATH_OVERRIDE_SOONG ?=
+
+# Register every variable the kernel-header genrules expand (mirrors the
+# EXPORT_TO_SOONG list in vendor/lineage/config/BoardConfigSoong.mk).
+$(call soong_config_set,lineageVarsPlugin,KERNEL_ARCH,$(KERNEL_ARCH))
+$(call soong_config_set,lineageVarsPlugin,KERNEL_BUILD_OUT_PREFIX,$(KERNEL_BUILD_OUT_PREFIX))
+$(call soong_config_set,lineageVarsPlugin,KERNEL_CROSS_COMPILE,$(KERNEL_CROSS_COMPILE))
+$(call soong_config_set,lineageVarsPlugin,KERNEL_MAKE_CMD,$(KERNEL_MAKE_CMD))
+$(call soong_config_set,lineageVarsPlugin,KERNEL_MAKE_FLAGS,$(KERNEL_MAKE_FLAGS))
+$(call soong_config_set,lineageVarsPlugin,KERNEL_PATH,$(KERNEL_PATH))
+$(call soong_config_set,lineageVarsPlugin,PATH_OVERRIDE_SOONG,$(PATH_OVERRIDE_SOONG))
+$(call soong_config_set,lineageVarsPlugin,TARGET_KERNEL_CONFIG,$(TARGET_KERNEL_CONFIG))
+$(call soong_config_set,lineageVarsPlugin,TARGET_KERNEL_SOURCE,$(TARGET_KERNEL_SOURCE))
+$(call soong_config_set,lineageVarsPlugin,TARGET_KERNEL_PLATFORM_TARGET,$(TARGET_KERNEL_PLATFORM_TARGET))
+$(call soong_config_set,lineageVarsPlugin,TARGET_PREBUILT_KERNEL_HEADERS,$(TARGET_PREBUILT_KERNEL_HEADERS))
+
+# Kernel modules (guarded so a missing/partial tree never errors with "cat: ... No such file")
+BOARD_VENDOR_KERNEL_MODULES_BLOCKLIST_FILE := $(wildcard $(COMMON_PATH)/modules.blocklist)
+BOARD_VENDOR_KERNEL_MODULES_LOAD := $(if $(wildcard $(COMMON_PATH)/modules.load),$(strip $(shell cat $(COMMON_PATH)/modules.load)),)
+BOARD_VENDOR_RAMDISK_RECOVERY_KERNEL_MODULES_LOAD := $(if $(wildcard $(COMMON_PATH)/modules.load.recovery),$(strip $(shell cat $(COMMON_PATH)/modules.load.recovery)),)
+BOOT_KERNEL_MODULES := $(if $(wildcard $(COMMON_PATH)/modules.include.recovery),$(strip $(shell cat $(COMMON_PATH)/modules.include.recovery)),)
 TARGET_MODULE_ALIASES += wlan.ko:qca_cld3_wlan.ko
 
 # Platform
