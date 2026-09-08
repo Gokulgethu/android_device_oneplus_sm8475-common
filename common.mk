@@ -75,12 +75,15 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/audio/bluetooth_hearing_aid_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/bluetooth_hearing_aid_audio_policy_configuration.xml \
     $(LOCAL_PATH)/configs/audio/default_volume_tables.xml:$(TARGET_COPY_OUT_VENDOR)/etc/default_volume_tables.xml
 
-AUDIO_HAL_DIR := hardware/qcom-caf/sm8350/audio
-
-PRODUCT_COPY_FILES += \
-    $(AUDIO_HAL_DIR)/configs/common/audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio_policy_configuration.xml \
-    $(AUDIO_HAL_DIR)/configs/taro/audio_platform_info.xml:$(TARGET_COPY_OUT_VENDOR)/etc/audio/sku_taro/audio_platform_info.xml \
-    $(AUDIO_HAL_DIR)/configs/taro/audio_tuning_mixer.txt:$(TARGET_COPY_OUT_VENDOR)/etc/audio_tuning_mixer.txt
+# Audio: the audio policy / effects / IO configs are the curated copies from
+# $(LOCAL_PATH)/configs/audio/ (installed above).
+#
+# The old block that pulled audio_platform_info.xml / audio_tuning_mixer.txt
+# from hardware/qcom-caf/sm8350/audio/configs/taro/ is gone: the CAF HAL
+# branch pinned by current ROMs (lineage-23.2-caf-sm8350) has no configs/taro/
+# directory, so the copies hard-failed fresh builds with
+# "No rule to make target". The stock audio_platform_info.xml is extracted
+# from the firmware dump instead (see proprietary-files.txt -> vendor blobs).
 
 PRODUCT_COPY_FILES += \
     frameworks/av/services/audiopolicy/config/bluetooth_audio_policy_configuration.xml:$(TARGET_COPY_OUT_VENDOR)/etc/bluetooth_audio_policy_configuration.xml \
