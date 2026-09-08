@@ -49,19 +49,22 @@ vendor / odm / *_dlkm, and arranges them as a rooted dump under `/tmp/dump`.
 device/oneplus/udon/tools/firmware_update/update_blobs.sh /tmp/dump
 ```
 
-This runs the standard LineageOS `extract-files.sh` (via
-`vendor/lineage/build/tools/extract_utils.sh`) using `proprietary-files.txt`, rebuilds
-`Android.bp` / `*.mk` / `BoardConfigVendor.mk` in
-`vendor/oneplus/{udon,CPH2487,sm8475-common,sm8450-common}`, and refreshes the build
+This runs the self-contained `extract-files.sh` from every device tree (no
+`vendor/lineage` extract_utils dependency - the current crDroid 16 /
+LineageOS 23.2 sources do not ship it) using each tree's
+`proprietary-files.txt`, rebuilds `Android.bp` / `*-vendor.mk` in
+`vendor/oneplus/{sm8475-common,sm8450-common,udon,CPH2487}`, and refreshes the build
 **fingerprint**, **description** and **security patch** in the product makefiles and
-BoardConfigs.
+BoardConfigs. Pinned hashes (`path|sha1`) are verified and re-pinned automatically
+when a stock file changes.
 
 ## 4. Verify no blobs went missing
 
 ```bash
-# Any blobs in proprietary-files.txt that are no longer in the dump are reported by
-# extract-files. Audit them:
-grep -rn "could not find\|file not found\|missing" /tmp/extract-*.log 2>/dev/null || true
+# Any blobs in proprietary-files.txt that are no longer in the dump are reported
+# by extract-files as "MISSING <tree>: <path>" (it then exits non-zero). Audit:
+#   update_blobs.sh /tmp/dump 2>&1 | tee /tmp/update-blobs.log
+grep -n "MISSING" /tmp/update-blobs.log || true
 
 # Ensure Dolby still resolves (hardware/dolby is a portable package, not firmware):
 ls hardware/dolby >/dev/null && echo "Dolby package present"
@@ -92,4 +95,7 @@ source build/envsetup.sh && breakfast crdroid_udon && mka bacon
   independent of the firmware extraction and continues to work after a blob bump.
 - If `extract-files.sh` reports new/renamed blobs, update
   `device/oneplus/sm8475-common/proprietary-files.txt` accordingly (the script pins
-  hashes; remove the trailing `|<sha1>` to let it re-pin automatically).
+  hashes and re-pins changed files automatically; remove the trailing `|<sha1>` to
+  keep an entry unpinned).
+- Audio: `vendor/etc/audio/sku_taro/audio_platform_info.xml` is extracted with the
+  rest of the blobs; it is required by the prebuilt `audio.primary.taro` HAL.
