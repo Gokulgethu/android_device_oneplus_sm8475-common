@@ -33,9 +33,12 @@ PRODUCT_PACKAGES += \
     com.dsi.ant@1.0.vendor
 
 # Alert slider
+# Alert slider - LineageOS-only (depends on org.lineageos.settings.resources)
+ifneq ($(filter lineage_%,$(TARGET_PRODUCT)),)
 PRODUCT_PACKAGES += \
     KeyHandler \
     tri-state-key-calibrate
+endif
 
 # Audio
 PRODUCT_PACKAGES += \
@@ -163,8 +166,11 @@ PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.touchscreen.multitouch.jazzhand.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.touchscreen.multitouch.jazzhand.xml
 
 # Doze
+# Doze - LineageOS-only (depends on org.lineageos.settings.resources)
+ifneq ($(filter lineage_%,$(TARGET_PRODUCT)),)
 PRODUCT_PACKAGES += \
     OplusDoze
+endif
 
 # DRM
 PRODUCT_PACKAGES += \
