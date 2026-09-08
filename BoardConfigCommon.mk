@@ -212,7 +212,7 @@ TARGET_USERIMAGES_USE_EXT4 := true
 TARGET_USERIMAGES_USE_F2FS := true
 
 # RIL
-CUSTOM_APNS_FILE := $(COMMON_PATH)/configs/apns/apns-conf.xml
+CUSTOM_APNS_FILE := $(wildcard $(COMMON_PATH)/configs/apns/apns-conf.xml)
 ENABLE_VENDOR_RIL_SERVICE := true
 
 # Security

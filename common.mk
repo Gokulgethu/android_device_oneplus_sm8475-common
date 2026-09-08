@@ -178,7 +178,7 @@ PRODUCT_PACKAGES += \
 
 # Fingerprint
 PRODUCT_PACKAGES += \
-    android.hardware.biometrics.fingerprint@2.3-service.oplus_taro
+    android.hardware.biometrics.fingerprint@2.3-service.oplus
 
 PRODUCT_COPY_FILES += \
     frameworks/native/data/etc/android.hardware.fingerprint.xml:$(TARGET_COPY_OUT_VENDOR)/etc/permissions/android.hardware.fingerprint.xml
@@ -227,16 +227,14 @@ PRODUCT_PACKAGES += \
     ipacm \
     IPACM_cfg.xml
 
-# Init
+# Init (ROM-side modules only; the oplus-specific init scripts -
+# init.oplus.rc/.sh, init.oplus.hw.rc[.recovery], init.taro.post_boot.sh,
+# ueventd.oplus.rc - came from OnePlus' internal QSSI tree, which is not
+# part of this stack, and had no backing files here)
 PRODUCT_PACKAGES += \
     fstab.default \
     fstab.default.vendor_ramdisk \
     init.class_main.sh \
-    init.taro.post_boot.sh \
-    init.oplus.hw.rc \
-    init.oplus.hw.rc.recovery \
-    init.oplus.rc \
-    init.oplus.sh \
     init.qcom.early_boot.sh \
     init.qcom.rc \
     init.qcom.recovery.rc \
@@ -244,7 +242,6 @@ PRODUCT_PACKAGES += \
     init.qcom.usb.rc \
     init.qcom.usb.sh \
     init.target.rc \
-    ueventd.oplus.rc \
     ueventd.qcom.rc
 
 # Keymaster
@@ -317,16 +314,12 @@ PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/permissions/privapp-permissions-oplus.xml:$(TARGET_COPY_OUT_SYSTEM_EXT)/etc/permissions/privapp-permissions-oplus.xml \
     $(LOCAL_PATH)/configs/sysconfig/hiddenapi-package-oplus-whitelist.xml:$(TARGET_COPY_OUT_SYSTEM)/etc/sysconfig/hiddenapi-package-oplus-whitelist.xml
 
-# OPLUS framework
+# OPLUS framework (module defined in hardware/oplus/oplus-fwk)
 PRODUCT_PACKAGES += \
-    oplus-fwk.taro
+    oplus-fwk
 
 PRODUCT_BOOT_JARS += \
-    oplus-fwk.taro
-
-# OPLUS wrapper
-PRODUCT_BOOT_JARS += \
-    oplus-support-wrapper
+    oplus-fwk
 
 # Overlays
 PRODUCT_ENFORCE_RRO_TARGETS := *
@@ -335,22 +328,10 @@ PRODUCT_ENFORCE_RRO_TARGETS := *
 DEVICE_PACKAGE_OVERLAYS += \
     $(LOCAL_PATH)/overlay-aosp
 
-# OPLUS Common Overlay
-PRODUCT_PACKAGES += \
-    CarrierConfigResCommon \
-    FrameworksResTarget \
-    OPlusFrameworksResCommon \
-    OPlusSettingsResCommon \
-    OPlusSystemUIResCommon \
-    WifiResTarget
-
-# QSSI Overlay
-PRODUCT_PACKAGES += \
-    FrameworksResCommon \
-    OPlusWifiResCommon \
-    SystemUIResCommon \
-    TelephonyResCommon \
-    WifiResCommon
+# The OnePlus QSSI overlay resource modules (OPlus*ResCommon, *ResCommon,
+# *ResTarget) live in OnePlus' internal QSSI trees, which are not part of
+# this stack; the curated overlays below are installed via
+# DEVICE_PACKAGE_OVERLAYS instead.
 
 # OnePlus Dolby
 PRODUCT_COPY_FILES += \
@@ -395,7 +376,7 @@ PRODUCT_PACKAGES += \
 PRODUCT_PACKAGES += \
     android.hardware.sensors@2.0-service.multihal \
     libsensorndkbridge \
-    sensors.oplus_taro
+    sensors.oplus
 
 PRODUCT_COPY_FILES += \
     $(LOCAL_PATH)/configs/sensors/hals.conf:$(TARGET_COPY_OUT_VENDOR)/etc/sensors/hals.conf
@@ -456,7 +437,7 @@ PRODUCT_PACKAGES += \
 
 # Touch
 PRODUCT_PACKAGES += \
-    vendor.lineage.touch@1.0-service.oplus_taro
+    vendor.lineage.touch@1.0-service.oplus
 
 # Update engine
 PRODUCT_PACKAGES += \
@@ -488,10 +469,10 @@ PRODUCT_COPY_FILES += \
 
 # Vibrator
 PRODUCT_PACKAGES += \
-    vendor.qti.hardware.vibrator.service.oplus_taro
+    vendor.qti.hardware.vibrator.service.oplus
 
 PRODUCT_COPY_FILES += \
-    vendor/qcom/opensource/vibrator/excluded-input-devices.xml:$(TARGET_COPY_OUT_VENDOR)/etc/excluded-input-devices.xml
+    $(if $(wildcard vendor/qcom/opensource/vibrator/excluded-input-devices.xml),vendor/qcom/opensource/vibrator/excluded-input-devices.xml:$(TARGET_COPY_OUT_VENDOR)/etc/excluded-input-devices.xml)
 
 # VNDK
 PRODUCT_COPY_FILES += \
