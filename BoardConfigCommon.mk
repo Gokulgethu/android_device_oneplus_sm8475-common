@@ -82,10 +82,14 @@ TARGET_FS_CONFIG_GEN := $(COMMON_PATH)/config.fs
 TARGET_SURFACEFLINGER_UDFPS_LIB := //$(COMMON_PATH):libudfps_extension.oplus_taro
 
 # HIDL
+# Guard with wildcard: current ROMs (crDroid 16.0, LineageOS 23.2) do not
+# mount vendor/aosp, and an unguarded missing matrix file makes
+# vintf-prepare abort. Keep := (not +=): both the sm8475 and sm8450 common
+# trees are included in the same build, so := avoids duplicate entries.
 DEVICE_FRAMEWORK_COMPATIBILITY_MATRIX_FILE := \
-    $(COMMON_PATH)/device_framework_matrix.xml \
-    hardware/qcom-caf/common/vendor_framework_compatibility_matrix.xml \
-    vendor/aosp/config/device_framework_matrix.xml
+    $(wildcard $(COMMON_PATH)/device_framework_matrix.xml) \
+    $(wildcard hardware/qcom-caf/common/vendor_framework_compatibility_matrix.xml) \
+    $(wildcard vendor/aosp/config/device_framework_matrix.xml)
 DEVICE_MATRIX_FILE := $(COMMON_PATH)/compatibility_matrix.xml
 DEVICE_MANIFEST_FILE := $(COMMON_PATH)/manifest.xml
 ODM_MANIFEST_FILES := $(COMMON_PATH)/manifest_odm.xml
